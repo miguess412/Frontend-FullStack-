@@ -1,0 +1,80 @@
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-wifi me-2"></i>
+                        ISP-Manager Admin
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Correo Electrónico</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-envelope"></i>
+                                </span>
+                                <input 
+                                    type="email" 
+                                    class="form-control" 
+                                    id="email"
+                                    name="email"
+                                    [(ngModel)]="credentials.email"
+                                    required
+                                    email
+                                    #email="ngModel"
+                                    placeholder="admin@ispmanager.com">
+                            </div>
+                            <div *ngIf="email.invalid && email.touched" class="text-danger small mt-1">
+                                <i class="bi bi-exclamation-circle"></i>
+                                Ingresa un correo válido
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                <input 
+                                    type="password" 
+                                    class="form-control" 
+                                    id="password"
+                                    name="password"
+                                    [(ngModel)]="credentials.password"
+                                    required
+                                    minlength="6"
+                                    #password="ngModel"
+                                    placeholder="••••••">
+                            </div>
+                            <div *ngIf="password.invalid && password.touched" class="text-danger small mt-1">
+                                <i class="bi bi-exclamation-circle"></i>
+                                La contraseña debe tener al menos 6 caracteres
+                            </div>
+                        </div>
+
+                        <div *ngIf="errorMessage" class="alert alert-danger py-2">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            {{ errorMessage }}
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            class="btn btn-primary w-100 py-2"
+                            [disabled]="loginForm.invalid || loading">
+                            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                            <i *ngIf="!loading" class="bi bi-box-arrow-in-right me-2"></i>
+                            {{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+                        </button>
+                    </form>
+                </div>
+                <div class="card-footer text-center text-muted small">
+                    © 2026 ISP-Manager - Panel Administrativo
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
