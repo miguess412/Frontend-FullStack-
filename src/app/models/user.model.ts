@@ -4,6 +4,7 @@
     email: string;
     password?: string;
     rol_id?: number;
+    rol?: string;        
     telefono?: string;
     activo?: boolean;
     created_at?: Date;

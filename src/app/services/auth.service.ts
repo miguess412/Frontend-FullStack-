@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { isPlatformBrowser } from '@angular/common';
 
 export interface User {
   id?: number;
@@ -9,6 +10,7 @@ export interface User {
   email: string;
   password?: string;
   rol_id?: number;
+  rol?: string;
   telefono?: string;
   activo?: boolean;
   created_at?: Date;
@@ -33,11 +35,17 @@ export class AuthService {
   private userKey = 'current_user';
   
   private currentUserSubject: BehaviorSubject<User | null>;
+  private isBrowser: boolean;
 
-  constructor(private http: HttpClient) {
-    // Inicializar con null, luego cargar desde localStorage si existe
+  constructor(
+    private http: HttpClient,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
     this.currentUserSubject = new BehaviorSubject<User | null>(null);
-    this.loadUserFromStorage();
+    if (this.isBrowser) {
+      this.loadUserFromStorage();
+    }
   }
 
   public get currentUser$(): Observable<User | null> {
@@ -45,7 +53,7 @@ export class AuthService {
   }
 
   private loadUserFromStorage(): void {
-    if (typeof window !== 'undefined' && window.localStorage) {
+    if (this.isBrowser) {
       const userJson = localStorage.getItem(this.userKey);
       if (userJson) {
         try {
@@ -66,14 +74,12 @@ export class AuthService {
         tap(response => {
           console.log('Login exitoso, token recibido');
           
-          // Guardar token y usuario
-          if (typeof window !== 'undefined' && window.localStorage) {
+          if (this.isBrowser) {
             localStorage.setItem(this.tokenKey, response.token);
             localStorage.setItem(this.userKey, JSON.stringify(response.user));
             console.log('Token guardado en localStorage');
           }
           
-          // Actualizar el subject
           this.currentUserSubject.next(response.user);
         })
       );
@@ -82,7 +88,7 @@ export class AuthService {
   logout(): void {
     console.log('Cerrando sesión...');
     
-    if (typeof window !== 'undefined' && window.localStorage) {
+    if (this.isBrowser) {
       localStorage.removeItem(this.tokenKey);
       localStorage.removeItem(this.userKey);
       console.log('Token eliminado del localStorage');
@@ -92,12 +98,12 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    if (typeof window !== 'undefined' && window.localStorage) {
+    if (this.isBrowser) {
       const token = localStorage.getItem(this.tokenKey);
       console.log('getToken() - Token existe?', !!token);
       return token;
     }
-    console.log('getToken() - Window no disponible');
+    console.log('getToken() - No es navegador');
     return null;
   }
 

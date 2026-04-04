@@ -1,21 +1,17 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { LoginRequest } from '../../models/user.model';
-// IMPORTA LOS MÓDULOS NECESARIOS
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService, LoginRequest } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
-  // AGREGA LOS MÓDULOS AL ARRAY DE IMPORTS
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './login.html',
-  // CORRIGE LA RUTA DEL CSS (QUITA '.component')
   styleUrls: ['./login.css']
 })
 export class LoginComponent {
-  // ... (el resto del código de tu componente se queda igual)
   credentials: LoginRequest = {
     email: '',
     password: ''
@@ -36,7 +32,16 @@ export class LoginComponent {
       next: (response) => {
         this.loading = false;
         console.log('Login exitoso:', response);
-        this.router.navigate(['/dashboard']);
+        console.log('Rol recibido:', response.user.rol);
+        
+        // Redirigir según el rol
+        if (response.user.rol === 'admin') {
+          console.log('Redirigiendo a admin dashboard');
+          this.router.navigate(['/admin/dashboard']);
+        } else {
+          console.log('Redirigiendo a cliente dashboard');
+          this.router.navigate(['/cliente/dashboard']);
+        }
       },
       error: (error) => {
         this.loading = false;
@@ -54,4 +59,4 @@ export class LoginComponent {
       }
     });
   }
-}
+}   
