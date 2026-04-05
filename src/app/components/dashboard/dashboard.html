@@ -13,15 +13,6 @@
         </div>
     </nav>
 
-    <!-- Mostrar datos directamente sin condiciones -->
-    <div class="container mt-3">
-        <div class="alert alert-info">
-            <strong>Datos:</strong> Clientes: {{ stats?.totalClientes }} | 
-            Pendiente: {{ stats?.totalPendiente }} | 
-            Pagado: {{ stats?.totalPagado }}
-        </div>
-    </div>
-
     <!-- Tarjetas de estadísticas -->
     <div class="row mb-4">
         <div class="col-md-3">
@@ -57,6 +48,25 @@
             </div>
         </div>
     </div>
+
+    <!-- Botón para ir a gestión de clientes -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-people me-2"></i>
+                    Gestión de Clientes
+                </h5>
+                <p class="card-text">Administra los clientes registrados en el sistema: crea, edita, elimina y gestiona sus planes.</p>
+                <a routerLink="/admin/clientes" class="btn btn-primary">
+                    <i class="bi bi-arrow-right me-2"></i>
+                    Ir a Gestión de Clientes
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- Tablas -->
     <div class="row">
