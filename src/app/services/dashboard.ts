@@ -41,4 +41,9 @@ export class DashboardService {
   getStats(): Observable<DashboardResponse> {
     return this.http.get<DashboardResponse>(`${this.apiUrl}/stats`);
   }
+
+  // Nuevo método para gráficas
+  getStatsForCharts(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/stats-charts`);
+  }
 }

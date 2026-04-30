@@ -1,36 +1,50 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { DashboardService, DashboardStats } from '../../services/dashboard';
 import { User } from '../../models/user.model';
-import { RouterModule } from '@angular/router';
+import Chart from 'chart.js/auto';
 
 @Component({
   selector: 'app-dashboard',
+  standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, AfterViewInit {
+  @ViewChild('lineChartCanvas') lineChartCanvas!: ElementRef;
+  @ViewChild('pieChartCanvas') pieChartCanvas!: ElementRef;
+
   currentUser: User | null = null;
   stats: DashboardStats | null = null;
   loading = true;
   error = false;
 
+  private lineChart: any = null;
+  private pieChart: any = null;
+  
+  public chartData: any = null;
+
   constructor(
     private authService: AuthService,
     private dashboardService: DashboardService,
     private router: Router,
-    private cdr: ChangeDetectorRef  // ← AGREGAR ESTO
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
-      this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
+      this.cdr.detectChanges();
     });
     this.loadDashboardStats();
+    this.loadChartStats();
+  }
+
+  ngAfterViewInit(): void {
+    // Los gráficos se crearán después de que lleguen los datos
   }
 
   loadDashboardStats(): void {
@@ -38,23 +52,118 @@ export class DashboardComponent implements OnInit {
     this.error = false;
 
     this.dashboardService.getStats().subscribe({
-      next: (response) => {
+      next: (response: any) => {
         this.stats = response.data;
         this.loading = false;
-        this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN CUANDO LLEGAN DATOS
+        this.cdr.detectChanges();
         console.log('Dashboard stats cargados:', this.stats);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error al cargar dashboard:', err);
         this.error = true;
         this.loading = false;
-        this.cdr.detectChanges(); // ← TAMBIÉN EN ERROR
+        this.cdr.detectChanges();
         if (err.status === 401) {
           this.authService.logout();
           this.router.navigate(['/login']);
         }
       }
     });
+  }
+
+  loadChartStats(): void {
+    this.dashboardService.getStatsForCharts().subscribe({
+      next: (response: any) => {
+        console.log('Datos para gráficas:', response);
+        this.chartData = response.data;
+        // Pequeño retraso para asegurar que el DOM está listo
+        setTimeout(() => {
+          this.createCharts();
+        }, 100);
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Error al cargar estadísticas para gráficas:', err);
+      }
+    });
+  }
+
+  createCharts(): void {
+    if (!this.chartData) return;
+
+    // Destruir gráficos existentes si los hay
+    if (this.lineChart) {
+      this.lineChart.destroy();
+      this.lineChart = null;
+    }
+    if (this.pieChart) {
+      this.pieChart.destroy();
+      this.pieChart = null;
+    }
+
+    // Crear gráfico de líneas (facturas)
+    if (this.lineChartCanvas && this.lineChartCanvas.nativeElement) {
+      const ctx = this.lineChartCanvas.nativeElement.getContext('2d');
+      if (ctx) {
+        this.lineChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: this.chartData.facturas.labels,
+            datasets: [
+              {
+                label: 'Pagadas',
+                data: this.chartData.facturas.pagadas,
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40,167,69,0.1)',
+                tension: 0.4,
+                fill: true
+              },
+              {
+                label: 'Pendientes',
+                data: this.chartData.facturas.pendientes,
+                borderColor: '#ffc107',
+                backgroundColor: 'rgba(255,193,7,0.1)',
+                tension: 0.4,
+                fill: true
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top' }
+            }
+          }
+        });
+        console.log('Gráfico de líneas creado');
+      }
+    }
+
+    // Crear gráfico de pastel (planes populares)
+    if (this.pieChartCanvas && this.pieChartCanvas.nativeElement) {
+      const ctx = this.pieChartCanvas.nativeElement.getContext('2d');
+      if (ctx) {
+        this.pieChart = new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels: this.chartData.planes.labels,
+            datasets: [{
+              data: this.chartData.planes.values,
+              backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top' }
+            }
+          }
+        });
+        console.log('Gráfico de pastel creado');
+      }
+    }
   }
 
   logout(): void {

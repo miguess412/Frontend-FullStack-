@@ -49,6 +49,41 @@
         </div>
     </div>
 
+    <!-- Gráficos -->
+<!-- Gráficos -->
+<div class="row mt-5" *ngIf="!loading && !error && chartData">
+    <div class="col-md-12">
+        <h3>Estadísticas Avanzadas</h3>
+        <hr>
+    </div>
+
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-graph-up"></i> Evolución de Facturas
+            </div>
+            <div class="card-body">
+                <div style="height: 350px; width: 100%;">
+                    <canvas #lineChartCanvas></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-pie-chart"></i> Planes Populares
+            </div>
+            <div class="card-body">
+                <div style="height: 300px; width: 100%;">
+                    <canvas #pieChartCanvas></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
     <!-- Botón para ir a gestión de clientes -->
 <div class="row mt-4">
     <div class="col-12">
