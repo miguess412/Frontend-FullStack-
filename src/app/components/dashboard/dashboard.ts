@@ -5,6 +5,7 @@ import { AuthService } from '../../services/auth.service';
 import { DashboardService, DashboardStats } from '../../services/dashboard';
 import { User } from '../../models/user.model';
 import Chart from 'chart.js/auto';
+import { PdfService } from '../../services/pdf.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,7 +32,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     private authService: AuthService,
     private dashboardService: DashboardService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private pdfService: PdfService
   ) {}
 
   ngOnInit(): void {
@@ -70,6 +72,23 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       }
     });
   }
+
+  async exportarClientesPDF(): Promise<void> {
+  if (this.stats && this.stats.ultimosClientes) {
+    await this.pdfService.generarPDFClientes(this.stats.ultimosClientes, 'Reporte de Clientes - ISP-Manager');
+  } else {
+    console.warn('No hay datos de clientes para exportar');
+  }
+}
+
+async exportarFacturasPDF(): Promise<void> {
+  if (this.stats && this.stats.ultimasFacturas) {
+    console.log('Facturas recibidas:', this.stats.ultimasFacturas);
+    await this.pdfService.generarPDFFacturas(this.stats.ultimasFacturas, 'Reporte de Facturas - ISP-Manager');
+  } else {
+    console.warn('No hay datos de facturas para exportar');
+  }
+}
 
   loadChartStats(): void {
     this.dashboardService.getStatsForCharts().subscribe({
@@ -198,4 +217,5 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         return 'bg-secondary';
     }
   }
+  
 }
