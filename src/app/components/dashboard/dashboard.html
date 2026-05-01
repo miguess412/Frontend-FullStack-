@@ -117,47 +117,4 @@
     </div>
 </div>
 
-    <!-- Tablas -->
-    <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header">Últimos Clientes</div>
-                <div class="card-body p-0">
-                    <table class="table">
-                        <thead>
-                            32<th>Nombre</th><th>Email</th><th>Plan</th>32
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let cliente of stats?.ultimosClientes ?? []">
-                                <td>{{ cliente.nombre }}</td>
-                                <td>{{ cliente.email }}</td>
-                                <td>{{ cliente.plan }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header">Facturas Recientes</div>
-                <div class="card-body p-0">
-                    <table class="table">
-                        <thead>
-                            32<th>Cliente</th><th>Monto</th><th>Estado</th><th>Vencimiento</th>32
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let factura of stats?.ultimasFacturas ?? []">
-                                <td>{{ factura.cliente }}</td>
-                                <td>{{ formatMoney(factura.monto) }}</td>
-                                <td><span class="badge" [ngClass]="getEstadoClass(factura.estado)">{{ factura.estado }}</span></td>
-                                <td>{{ formatDate(factura.fecha_vencimiento) }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+    
