@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ClienteService, FacturaCliente, PlanCliente } from '../../services/cliente';
 import { User } from '../../models/user.model';
+import { PagoService } from '../../services/pago.service';
 
 @Component({
   selector: 'app-dashboard-cliente',
@@ -24,6 +25,7 @@ export class DashboardClienteComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private clienteService: ClienteService,
+    private pagoService: PagoService,
     private router: Router,
     private cdr: ChangeDetectorRef  
   ) {}
@@ -83,17 +85,27 @@ export class DashboardClienteComponent implements OnInit {
 }
 
   pagarFactura(facturaId: number): void {
-    this.clienteService.pagarFactura(facturaId).subscribe({
-      next: () => {
-        alert('Pago realizado exitosamente');
-        this.cargarDatosCliente();
-      },
-      error: (err) => {
-        console.error('Error al pagar:', err);
-        alert('Error al procesar el pago');
+  // Mostrar loading
+  const btn = document.activeElement as HTMLElement;
+  if (btn) btn.innerText = 'Procesando...';
+  
+  this.pagoService.crearOrden(facturaId).subscribe({
+    next: (response) => {
+      if (response.success && response.approvalUrl) {
+        // Redirigir a PayPal para el pago
+        window.location.href = response.approvalUrl;
+      } else {
+        alert('Error al crear la orden de pago');
+        if (btn) btn.innerText = 'Pagar';
       }
-    });
-  }
+    },
+    error: (err) => {
+      console.error('Error:', err);
+      alert('Error al procesar el pago');
+      if (btn) btn.innerText = 'Pagar';
+    }
+  });
+}
 
   pagarAhora(): void {
     if (this.proximoPago) {
