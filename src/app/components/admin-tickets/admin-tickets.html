@@ -1,0 +1,197 @@
+<div class="container-fluid">
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-primary mb-4">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-ticket"></i> Gestión de Tickets - Soporte
+            </span>
+            <div class="d-flex align-items-center">
+                <button class="btn btn-outline-light btn-sm me-2" routerLink="/admin/dashboard">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </button>
+                <button class="btn btn-outline-light btn-sm" (click)="logout()">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Tabla de tickets -->
+    <div class="card">
+        <div class="card-header">
+            <i class="bi bi-list-ul"></i> Todos los Tickets de Soporte
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Cliente</th>
+                            <th>Asunto</th>
+                            <th>Prioridad</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let ticket of tickets">
+                            <td>{{ ticket.id }}</td>
+                            <td>{{ ticket.cliente }}<br><small class="text-muted">{{ ticket.cliente_email }}</small></td>
+                            <td>{{ ticket.asunto }}</td>
+                            <td>
+                                <span class="badge" [ngClass]="{
+                                    'bg-danger': ticket.prioridad === 'alta',
+                                    'bg-warning text-dark': ticket.prioridad === 'media',
+                                    'bg-info': ticket.prioridad === 'baja'
+                                }">
+                                    {{ ticket.prioridad }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge" [ngClass]="{
+                                    'bg-secondary': ticket.estado === 'cerrado',
+                                    'bg-primary': ticket.estado === 'abierto',
+                                    'bg-warning text-dark': ticket.estado === 'en_proceso',
+                                    'bg-success': ticket.estado === 'resuelto'
+                                }">
+                                    {{ ticket.estado }}
+                                </span>
+                            </td>
+                            <td>{{ ticket.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-info me-1" (click)="verDetalle(ticket)">
+                                    <i class="bi bi-eye"></i> Ver
+                                </button>
+                                <!-- Botón Responder - ELIMINADO -->
+                                <!--button class="btn btn-sm btn-warning me-1" (click)="responder(ticket)">
+                                    <i class="bi bi-reply"></i> Responder
+                                </button> -->
+                                <button class="btn btn-sm btn-success me-1" (click)="cambiarEstado(ticket)">
+                                    <i class="bi bi-check-circle"></i> Estado
+                                </button>
+                            </td>
+                        </tr>
+                        <tr *ngIf="tickets.length === 0">
+                            <td colspan="7" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-1"></i>
+                                <p>No hay tickets de soporte</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal" tabindex="-1" [class.show]="mostrarModalDetalle" style="display: block" *ngIf="mostrarModalDetalle">
+    <div class="modal-dialog modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">Detalle del Ticket #{{ ticketSeleccionado?.id }}</h5>
+                <button type="button" class="btn-close btn-close-white" (click)="cerrarModalDetalle()"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Cliente:</strong> {{ ticketSeleccionado?.cliente }}</p>
+                        <p><strong>Email:</strong> {{ ticketSeleccionado?.cliente_email }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Fecha:</strong> {{ ticketSeleccionado?.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
+                        <p><strong>Estado:</strong> {{ ticketSeleccionado?.estado }}</p>
+                        <p><strong>Prioridad:</strong> {{ ticketSeleccionado?.prioridad }}</p>
+                    </div>
+                </div>
+                <hr>
+                <p><strong>Asunto:</strong> {{ ticketSeleccionado?.asunto }}</p>
+                <p><strong>Descripción:</strong></p>
+                <div class="alert alert-secondary">
+                    {{ ticketSeleccionado?.descripcion }}
+                </div>
+                
+                <!-- ============================================ -->
+                <!-- RESPUESTA DEL SOPORTE - AGREGADA AQUÍ        -->
+                <!-- ============================================ -->
+                <!-- Sección de respuesta - ELIMINADA -->
+                <!-- 
+                <hr>
+                <p><strong>Respuesta del soporte:</strong></p>
+                <div class="alert alert-success">
+                    <i class="bi bi-chat-dots me-2"></i>
+                    {{ ticketSeleccionado?.respuesta || 'Aún no hay respuesta' }}
+                </div>
+                -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="cerrarModalDetalle()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Responder - ELIMINADO -->
+<!-- Modal Responder -->
+ <!--
+<div class="modal" tabindex="-1" [class.show]="mostrarModalResponder" style="display: block" *ngIf="mostrarModalResponder">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">Responder Ticket #{{ ticketSeleccionado?.id }}</h5>
+                <button type="button" class="btn-close" (click)="cerrarModalResponder()"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Cliente:</strong> {{ ticketSeleccionado?.cliente }}</p>
+                <p><strong>Asunto:</strong> {{ ticketSeleccionado?.asunto }}</p>
+                <div class="mb-3">
+                    <label class="form-label">Respuesta</label>
+                    <textarea class="form-control" rows="4" [(ngModel)]="respuesta"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Actualizar Estado</label>
+                    <select class="form-select" [(ngModel)]="nuevoEstado">
+                        <option value="abierto">Abierto</option>
+                        <option value="en_proceso">En Proceso</option>
+                        <option value="resuelto">Resuelto</option>
+                        <option value="cerrado">Cerrado</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="cerrarModalResponder()">Cancelar</button>
+                <button type="button" class="btn btn-primary" (click)="enviarRespuesta()">Enviar Respuesta</button>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<!-- Modal Estado -->
+<div class="modal" tabindex="-1" [class.show]="mostrarModalEstado" style="display: block" *ngIf="mostrarModalEstado">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Cambiar Estado - Ticket #{{ ticketSeleccionado?.id }}</h5>
+                <button type="button" class="btn-close btn-close-white" (click)="cerrarModalEstado()"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Asunto:</strong> {{ ticketSeleccionado?.asunto }}</p>
+                <div class="mb-3">
+                    <label class="form-label">Nuevo Estado</label>
+                    <select class="form-select" [(ngModel)]="nuevoEstado">
+                        <option value="abierto">Abierto</option>
+                        <option value="en_proceso">En Proceso</option>
+                        <option value="resuelto">Resuelto</option>
+                        <option value="cerrado">Cerrado</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="cerrarModalEstado()">Cancelar</button>
+                <button type="button" class="btn btn-primary" (click)="actualizarEstado()">Actualizar</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -5,11 +5,12 @@ import { AuthService } from '../../services/auth.service';
 import { ClienteService, FacturaCliente, PlanCliente } from '../../services/cliente';
 import { User } from '../../models/user.model';
 import { PagoService } from '../../services/pago.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard-cliente',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './dashboard-cliente.html',
   styleUrls: ['./dashboard-cliente.css']
 })

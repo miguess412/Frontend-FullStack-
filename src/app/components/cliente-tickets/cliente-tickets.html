@@ -1,0 +1,150 @@
+<div class="container-fluid">
+    <nav class="navbar navbar-dark bg-success mb-4">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-ticket"></i> Mis Tickets de Soporte
+            </span>
+            <div class="d-flex align-items-center">
+                <button class="btn btn-outline-light btn-sm me-2" routerLink="/cliente/dashboard">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </button>
+                <button class="btn btn-outline-light btn-sm" (click)="logout()">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Botón nuevo ticket -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <button class="btn btn-primary" (click)="abrirModalNuevoTicket()">
+                <i class="bi bi-plus-circle"></i> Nuevo Ticket
+            </button>
+        </div>
+    </div>
+
+    <!-- Lista de tickets -->
+    <div class="card">
+        <div class="card-header">
+            <i class="bi bi-list-ul"></i> Mis Tickets
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Asunto</th>
+                            <th>Prioridad</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let ticket of tickets">
+                            <td>{{ ticket.id }}</td>
+                            <td>{{ ticket.asunto }}</td>
+                            <td>
+                                <span class="badge" [ngClass]="{
+                                    'bg-danger': ticket.prioridad === 'alta',
+                                    'bg-warning': ticket.prioridad === 'media',
+                                    'bg-info': ticket.prioridad === 'baja'
+                                }">
+                                    {{ ticket.prioridad }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge" [ngClass]="{
+                                    'bg-secondary': ticket.estado === 'cerrado',
+                                    'bg-primary': ticket.estado === 'abierto',
+                                    'bg-warning': ticket.estado === 'en_proceso',
+                                    'bg-success': ticket.estado === 'resuelto'
+                                }">
+                                    {{ ticket.estado }}
+                                </span>
+                            </td>
+                            <td>{{ ticket.created_at | date:'dd/MM/yyyy' }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-info" (click)="verDetalle(ticket)">
+                                    <i class="bi bi-eye"></i> Ver
+                                </button>
+                            </td>
+                        </tr>
+                        <tr *ngIf="tickets.length === 0">
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-1"></i>
+                                <p>No hay tickets de soporte</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nuevo Ticket -->
+<div class="modal fade" id="nuevoTicketModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Nuevo Ticket de Soporte</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">Asunto</label>
+                        <input type="text" class="form-control" [(ngModel)]="nuevoTicket.asunto" name="asunto" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-control" rows="4" [(ngModel)]="nuevoTicket.descripcion" name="descripcion"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Prioridad</label>
+                        <select class="form-select" [(ngModel)]="nuevoTicket.prioridad" name="prioridad">
+                            <option value="baja">Baja</option>
+                            <option value="media">Media</option>
+                            <option value="alta">Alta</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" (click)="crearTicket()">Crear Ticket</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detalle Ticket -->
+<div class="modal fade" id="detalleTicketModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">Detalle del Ticket</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>ID:</strong> {{ ticketSeleccionado?.id }}</p>
+                <p><strong>Asunto:</strong> {{ ticketSeleccionado?.asunto }}</p>
+                <p><strong>Descripción:</strong> {{ ticketSeleccionado?.descripcion }}</p>
+                <p><strong>Estado:</strong> {{ ticketSeleccionado?.estado }}</p>
+                <p><strong>Prioridad:</strong> {{ ticketSeleccionado?.prioridad }}</p>
+                <p><strong>Creado:</strong> {{ ticketSeleccionado?.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
+                <hr>
+                <!--<div class="alert alert-success">
+                    <i class="bi bi-chat-dots me-2"></i>
+                    {{ ticketSeleccionado?.respuesta || 'Aún no hay respuesta' }}
+                </div> -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

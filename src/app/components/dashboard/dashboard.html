@@ -48,6 +48,7 @@
             </div>
         </div>
     </div>
+    
 
     <!-- Gráficos -->
 <!-- Gráficos -->
@@ -84,17 +85,20 @@
     </div>
 </div>
 
-<!-- Botones de exportación a PDF -->
+<!-- Botones de exportación a PDF y Tickets -->
 <div class="row mb-4">
     <div class="col-12">
-        <h3>Reportes</h3>
+        <h3>Gestión</h3>
         <hr>
         <button class="btn btn-danger me-2" (click)="exportarClientesPDF()">
             <i class="bi bi-file-pdf"></i> Exportar Clientes a PDF
         </button>
-        <button class="btn btn-danger" (click)="exportarFacturasPDF()">
+        <button class="btn btn-danger me-2" (click)="exportarFacturasPDF()">
             <i class="bi bi-file-pdf"></i> Exportar Facturas a PDF
         </button>
+        <a routerLink="/admin/tickets" class="btn btn-info">
+            <i class="bi bi-ticket"></i> Gestionar Tickets
+        </a>
     </div>
 </div>
 
@@ -116,5 +120,3 @@
         </div>
     </div>
 </div>
-
-    
