@@ -180,7 +180,7 @@
                 <p><strong>Asunto:</strong> {{ ticketSeleccionado?.asunto }}</p>
                 <div class="mb-3">
                     <label class="form-label">Nuevo Estado</label>
-                    <select class="form-select" [(ngModel)]="nuevoEstado">
+                    <select class="form-select" [(ngModel)]="nuevoEstado" name="estado">
                         <option value="abierto">Abierto</option>
                         <option value="en_proceso">En Proceso</option>
                         <option value="resuelto">Resuelto</option>

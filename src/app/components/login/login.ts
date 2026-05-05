@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, LoginRequest } from '../../services/auth.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-login',
@@ -21,7 +22,8 @@ export class LoginComponent {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+     private cdr: ChangeDetectorRef
   ) {}
 
   onSubmit(): void {
@@ -29,34 +31,32 @@ export class LoginComponent {
     this.errorMessage = '';
 
     this.authService.login(this.credentials).subscribe({
-      next: (response) => {
-        this.loading = false;
-        console.log('Login exitoso:', response);
-        console.log('Rol recibido:', response.user.rol);
-        
-        // Redirigir según el rol
-        if (response.user.rol === 'admin') {
-          console.log('Redirigiendo a admin dashboard');
-          this.router.navigate(['/admin/dashboard']);
-        } else {
-          console.log('Redirigiendo a cliente dashboard');
-          this.router.navigate(['/cliente/dashboard']);
+        next: (response) => {
+            this.loading = false;
+            if (response.user.rol === 'admin') {
+                this.router.navigate(['/admin/dashboard']);
+            } else {
+                this.router.navigate(['/cliente/dashboard']);
+            }
+        },
+        error: (error) => {
+            this.loading = false;
+            console.error('Error de login:', error);
+            
+            // Mostrar mensaje según el código de error
+            if (error.status === 401) {
+                this.errorMessage = 'Credenciales incorrectas';
+            } else if (error.status === 404) {
+                this.errorMessage = 'Servidor no disponible';
+            } else if (error.status === 0) {
+                this.errorMessage = 'Error de conexión con el servidor';
+            } else {
+                this.errorMessage = error.error?.message || 'Error al iniciar sesión';
+            }
+            
+            // Forzar actualización de la vista
+            this.cdr.detectChanges();
         }
-      },
-      error: (error) => {
-        this.loading = false;
-        console.error('Error de login:', error);
-        
-        if (error.status === 401) {
-          this.errorMessage = 'Credenciales incorrectas';
-        } else if (error.status === 404) {
-          this.errorMessage = 'Servidor no disponible';
-        } else if (error.status === 0) {
-          this.errorMessage = 'Error de conexión con el servidor';
-        } else {
-          this.errorMessage = error.error?.message || 'Error al iniciar sesión';
-        }
-      }
     });
   }
 }   
