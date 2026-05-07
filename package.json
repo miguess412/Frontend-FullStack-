@@ -49,6 +49,7 @@
     "@angular/build": "^21.1.4",
     "@angular/cli": "^21.1.4",
     "@angular/compiler-cli": "^21.1.0",
+    "@types/bootstrap": "^5.2.10",
     "@types/chart.js": "^2.9.41",
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
