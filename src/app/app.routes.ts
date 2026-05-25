@@ -9,6 +9,7 @@ import { PagoRetornoComponent } from './components/pago-retorno/pago-retorno';
 import { ClienteTicketsComponent } from './components/cliente-tickets/cliente-tickets';
 import { AdminTicketsComponent } from './components/admin-tickets/admin-tickets';
 import { PlanesComponent } from './components/admin/planes/planes';
+import { ClientePerfilComponent } from './components/cliente-perfil/cliente-perfil';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -22,5 +23,6 @@ export const routes: Routes = [
   { path: 'cliente/tickets', component: ClienteTicketsComponent },
   { path: 'admin/tickets', component: AdminTicketsComponent },
   { path: 'admin/planes', component: PlanesComponent },
+  { path: 'cliente/perfil', component: ClientePerfilComponent },
   { path: '**', redirectTo: '/login' }
 ];

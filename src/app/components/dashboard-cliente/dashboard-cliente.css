@@ -1,0 +1,9 @@
+.navbar-text {
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.navbar-text:hover {
+    opacity: 0.8;
+    text-decoration: underline !important;
+}
