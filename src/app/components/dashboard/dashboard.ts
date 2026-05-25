@@ -18,15 +18,26 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('lineChartCanvas') lineChartCanvas!: ElementRef;
   @ViewChild('pieChartCanvas') pieChartCanvas!: ElementRef;
 
+  currentDate: Date = new Date();
   currentUser: User | null = null;
   stats: DashboardStats | null = null;
   loading = true;
   error = false;
 
+  // Variables para el gráfico (para que el HTML no se queje)
+  lineChartLabels: string[] = [];
+  lineChartData: any[] = [];
+  lineChartOptions: any = { responsive: true, maintainAspectRatio: false };
+  lineChartLegend = true;
+  lineChartType = 'line';
+  pieChartLabels: string[] = [];
+  pieChartData: number[] = [];
+  pieChartOptions: any = { responsive: true, maintainAspectRatio: false };
+  pieChartType = 'pie';
+  chartData: any = null;
+
   private lineChart: any = null;
   private pieChart: any = null;
-  
-  public chartData: any = null;
 
   constructor(
     private authService: AuthService,
@@ -45,9 +56,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.loadChartStats();
   }
 
-  ngAfterViewInit(): void {
-    // Los gráficos se crearán después de que lleguen los datos
-  }
+  ngAfterViewInit(): void {}
 
   loadDashboardStats(): void {
     this.loading = true;
@@ -74,28 +83,42 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
   async exportarClientesPDF(): Promise<void> {
-  if (this.stats && this.stats.ultimosClientes) {
-    await this.pdfService.generarPDFClientes(this.stats.ultimosClientes, 'Reporte de Clientes - ISP-Manager');
-  } else {
-    console.warn('No hay datos de clientes para exportar');
+    if (this.stats && this.stats.ultimosClientes) {
+      await this.pdfService.generarPDFClientes(this.stats.ultimosClientes, 'Reporte de Clientes - ISP-Manager');
+    } else {
+      console.warn('No hay datos de clientes para exportar');
+    }
   }
-}
 
-async exportarFacturasPDF(): Promise<void> {
-  if (this.stats && this.stats.ultimasFacturas) {
-    console.log('Facturas recibidas:', this.stats.ultimasFacturas);
-    await this.pdfService.generarPDFFacturas(this.stats.ultimasFacturas, 'Reporte de Facturas - ISP-Manager');
-  } else {
-    console.warn('No hay datos de facturas para exportar');
+  async exportarFacturasPDF(): Promise<void> {
+    if (this.stats && this.stats.ultimasFacturas) {
+      console.log('Facturas recibidas:', this.stats.ultimasFacturas);
+      await this.pdfService.generarPDFFacturas(this.stats.ultimasFacturas, 'Reporte de Facturas - ISP-Manager');
+    } else {
+      console.warn('No hay datos de facturas para exportar');
+    }
   }
-}
 
   loadChartStats(): void {
     this.dashboardService.getStatsForCharts().subscribe({
       next: (response: any) => {
         console.log('Datos para gráficas:', response);
         this.chartData = response.data;
-        // Pequeño retraso para asegurar que el DOM está listo
+        
+        // Actualizar las variables que usa el HTML
+        if (this.chartData?.facturas) {
+          this.lineChartLabels = this.chartData.facturas.labels;
+          this.lineChartData = [
+            { data: this.chartData.facturas.pagadas, label: 'Pagadas' },
+            { data: this.chartData.facturas.pendientes, label: 'Pendientes' }
+          ];
+        }
+        
+        if (this.chartData?.planes) {
+          this.pieChartLabels = this.chartData.planes.labels;
+          this.pieChartData = this.chartData.planes.values;
+        }
+        
         setTimeout(() => {
           this.createCharts();
         }, 100);
@@ -110,7 +133,6 @@ async exportarFacturasPDF(): Promise<void> {
   createCharts(): void {
     if (!this.chartData) return;
 
-    // Destruir gráficos existentes si los hay
     if (this.lineChart) {
       this.lineChart.destroy();
       this.lineChart = null;
@@ -120,7 +142,6 @@ async exportarFacturasPDF(): Promise<void> {
       this.pieChart = null;
     }
 
-    // Crear gráfico de líneas (facturas)
     if (this.lineChartCanvas && this.lineChartCanvas.nativeElement) {
       const ctx = this.lineChartCanvas.nativeElement.getContext('2d');
       if (ctx) {
@@ -150,16 +171,13 @@ async exportarFacturasPDF(): Promise<void> {
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-              legend: { position: 'top' }
-            }
+            plugins: { legend: { position: 'top' } }
           }
         });
         console.log('Gráfico de líneas creado');
       }
     }
 
-    // Crear gráfico de pastel (planes populares)
     if (this.pieChartCanvas && this.pieChartCanvas.nativeElement) {
       const ctx = this.pieChartCanvas.nativeElement.getContext('2d');
       if (ctx) {
@@ -175,9 +193,7 @@ async exportarFacturasPDF(): Promise<void> {
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-              legend: { position: 'top' }
-            }
+            plugins: { legend: { position: 'top' } }
           }
         });
         console.log('Gráfico de pastel creado');
@@ -207,15 +223,10 @@ async exportarFacturasPDF(): Promise<void> {
 
   getEstadoClass(estado: string): string {
     switch (estado) {
-      case 'pagada':
-        return 'bg-success';
-      case 'pendiente':
-        return 'bg-warning text-dark';
-      case 'vencida':
-        return 'bg-danger';
-      default:
-        return 'bg-secondary';
+      case 'pagada': return 'bg-success';
+      case 'pendiente': return 'bg-warning text-dark';
+      case 'vencida': return 'bg-danger';
+      default: return 'bg-secondary';
     }
   }
-  
 }

@@ -1,121 +1,180 @@
-<div class="container-fluid">
-    <nav class="navbar navbar-dark bg-primary mb-4">
-        <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1">ISP-Manager Admin</span>
-            <div class="d-flex align-items-center">
-                <span class="navbar-text me-3">
-                    Bienvenido, {{ currentUser?.nombre || 'Administrador' }}
-                </span>
-                <button class="btn btn-outline-light btn-sm" (click)="logout()">
-                    Cerrar Sesión
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Tarjetas de estadísticas -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card text-white bg-primary">
-                <div class="card-body">
-                    <h6 class="card-title">Clientes</h6>
-                    <h2 class="mb-0">{{ stats?.totalClientes ?? 0 }}</h2>
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <!-- ============================================ -->
+        <!-- BARRA LATERAL (SIDEBAR) -->
+        <!-- ============================================ -->
+        <div class="col-auto col-md-3 col-xl-2 px-0 bg-dark">
+            <div class="d-flex flex-column p-3 text-white min-vh-100">
+                <div class="d-flex align-items-center mb-4">
+                    <i class="bi bi-wifi fs-3 me-2"></i>
+                    <span class="fs-4">ISP-Manager</span>
+                </div>
+                <hr>
+                <nav class="nav nav-pills flex-column mb-auto">
+                    <!-- Dashboard -->
+                    <a routerLink="/admin/dashboard" class="nav-link text-white active bg-primary mb-2">
+                        <i class="bi bi-speedometer2 me-2"></i>
+                        Dashboard
+                    </a>
+                    
+                    <!-- Gestión de Clientes -->
+                    <a routerLink="/admin/clientes" class="nav-link text-white mb-2">
+                        <i class="bi bi-people me-2"></i>
+                        Clientes
+                    </a>
+                    
+                    <!-- Gestión de Planes -->
+                    <a routerLink="/admin/planes" class="nav-link text-white mb-2">
+                        <i class="bi bi-trophy me-2"></i>
+                        Planes
+                    </a>
+                    
+                    <!-- Tickets -->
+                    <a routerLink="/admin/tickets" class="nav-link text-white mb-2">
+                        <i class="bi bi-ticket me-2"></i>
+                        Tickets
+                    </a>
+                    
+                    <!-- Reportes PDF -->
+                    <div class="dropdown mt-2">
+                        <button class="btn btn-secondary dropdown-toggle w-100 text-start" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-file-pdf me-2"></i> Reportes
+                        </button>
+                        <ul class="dropdown-menu w-100">
+                            <li><a class="dropdown-item" (click)="exportarClientesPDF()"><i class="bi bi-file-pdf me-2"></i>Clientes PDF</a></li>
+                            <li><a class="dropdown-item" (click)="exportarFacturasPDF()"><i class="bi bi-file-pdf me-2"></i>Facturas PDF</a></li>
+                        </ul>
+                    </div>
+                </nav>
+                <hr>
+                
+                <!-- Usuario -->
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle fs-4 me-2"></i>
+                        <strong>{{ currentUser?.nombre || 'Administrador' }}</strong>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item" (click)="logout()"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-success">
-                <div class="card-body">
-                    <h6 class="card-title">Facturas Pagadas</h6>
-                    <h2 class="mb-0">{{ formatMoney(stats?.totalPagado ?? 0) }}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-warning">
-                <div class="card-body">
-                    <h6 class="card-title">Pendientes</h6>
-                    <h2 class="mb-0">{{ formatMoney(stats?.totalPendiente ?? 0) }}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-info">
-                <div class="card-body">
-                    <h6 class="card-title">Tickets</h6>
-                    <h2 class="mb-0">{{ stats?.ticketsAbiertos ?? 0 }}</h2>
-                </div>
-            </div>
-        </div>
-    </div>
-    
 
-    <!-- Gráficos -->
-<!-- Gráficos -->
-<div class="row mt-5" *ngIf="!loading && !error && chartData">
-    <div class="col-md-12">
-        <h3>Estadísticas Avanzadas</h3>
-        <hr>
-    </div>
-
-    <div class="col-md-8 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <i class="bi bi-graph-up"></i> Evolución de Facturas
+        <!-- ============================================ -->
+        <!-- CONTENIDO PRINCIPAL -->
+        <!-- ============================================ -->
+        <div class="col-md-9 col-xl-10 p-4">
+            <!-- Título -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Dashboard</h2>
+                <span class="text-muted">{{ currentDate | date:'EEEE, d MMMM yyyy' }}</span>
             </div>
-            <div class="card-body">
-                <div style="height: 350px; width: 100%;">
-                    <canvas #lineChartCanvas></canvas>
+
+            <!-- Estado de carga -->
+            <div *ngIf="loading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
                 </div>
+                <p class="mt-2">Cargando datos...</p>
             </div>
-        </div>
-    </div>
 
-    <div class="col-md-4 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <i class="bi bi-pie-chart"></i> Planes Populares
+            <!-- Error -->
+            <div *ngIf="error" class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Error al cargar los datos. Por favor, recarga la página.
             </div>
-            <div class="card-body">
-                <div style="height: 300px; width: 100%;">
-                    <canvas #pieChartCanvas></canvas>
+
+            <!-- Contenido -->
+            <div *ngIf="!loading && !error && stats">
+                <!-- Tarjetas de estadísticas -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="card text-white bg-primary h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">Clientes</h6>
+                                        <h2 class="mb-0">{{ stats.totalClientes }}</h2>
+                                    </div>
+                                    <i class="bi bi-people fs-1 opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-success h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">Facturas Pagadas</h6>
+                                        <h2 class="mb-0">{{ formatMoney(stats.totalPagado) }}</h2>
+                                    </div>
+                                    <i class="bi bi-cash-stack fs-1 opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-warning h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">Pendientes</h6>
+                                        <h2 class="mb-0">{{ formatMoney(stats.totalPendiente) }}</h2>
+                                    </div>
+                                    <i class="bi bi-clock-history fs-1 opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-info h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">Tickets</h6>
+                                        <h2 class="mb-0">{{ stats.ticketsAbiertos }}</h2>
+                                    </div>
+                                    <i class="bi bi-ticket fs-1 opacity-50"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Botones de exportación a PDF y Tickets -->
-<div class="row mb-4">
-    <div class="col-12">
-        <h3>Gestión</h3>
-        <hr>
-        <button class="btn btn-danger me-2" (click)="exportarClientesPDF()">
-            <i class="bi bi-file-pdf"></i> Exportar Clientes a PDF
-        </button>
-        <button class="btn btn-danger me-2" (click)="exportarFacturasPDF()">
-            <i class="bi bi-file-pdf"></i> Exportar Facturas a PDF
-        </button>
-        <a routerLink="/admin/tickets" class="btn btn-info">
-            <i class="bi bi-ticket"></i> Gestionar Tickets
-        </a>
-    </div>
-</div>
+                <!-- Gráficos -->
+                <div class="row g-4 mt-3" *ngIf="chartData">
+                    <div class="col-md-12">
+                        <h3 class="mb-3">Estadísticas Avanzadas</h3>
+                    </div>
 
-    <!-- Botón para ir a gestión de clientes -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">
-                    <i class="bi bi-people me-2"></i>
-                    Gestión de Clientes
-                </h5>
-                <p class="card-text">Administra los clientes registrados en el sistema: crea, edita, elimina y gestiona sus planes.</p>
-                <a routerLink="/admin/clientes" class="btn btn-primary">
-                    <i class="bi bi-arrow-right me-2"></i>
-                    Ir a Gestión de Clientes
-                </a>
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-graph-up"></i> Evolución de Facturas
+                            </div>
+                            <div class="card-body">
+                                <div style="height: 350px; position: relative;">
+                                    <canvas #lineChartCanvas></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-pie-chart"></i> Planes Populares
+                            </div>
+                            <div class="card-body">
+                                <div style="height: 300px; position: relative;">
+                                    <canvas #pieChartCanvas></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

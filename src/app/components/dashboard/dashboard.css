@@ -1,0 +1,20 @@
+.min-vh-100 {
+    min-height: 100vh;
+}
+
+.nav-link {
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.375rem;
+}
+
+.dropdown-menu {
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    cursor: pointer;
+}
