@@ -141,14 +141,22 @@
                             <p class="text-muted small mb-3">
                                 <strong>Vence:</strong> {{ formatDate(proximoPago.fecha_vencimiento) }}
                             </p>
-                            <!-- HU14: Pagar Factura Pendiente -->
-                            <button class="btn btn-warning w-100 text-dark fw-bold" 
-                                    [disabled]="procesandoPagoId === proximoPago.id"
-                                    (click)="pagarAhora()">
-                                <span *ngIf="procesandoPagoId === proximoPago.id" class="spinner-border spinner-border-sm me-1"></span>
-                                <i *ngIf="procesandoPagoId !== proximoPago.id" class="bi bi-wallet2 me-1"></i>
-                                Pagar (Simulado)
-                            </button>
+                            <!-- HU14 / HU24: Pagar Factura Pendiente -->
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-warning w-100 text-dark fw-bold" 
+                                        [disabled]="procesandoPagoId === proximoPago.id"
+                                        (click)="pagarAhora()">
+                                    <span *ngIf="procesandoPagoId === proximoPago.id" class="spinner-border spinner-border-sm me-1"></span>
+                                    <i *ngIf="procesandoPagoId !== proximoPago.id" class="bi bi-wallet2 me-1"></i>
+                                    Pagar (Simulado)
+                                </button>
+                                <button class="btn btn-outline-primary w-100 fw-bold btn-sm"
+                                        title="Pagar con PayPal Sandbox"
+                                        [disabled]="procesandoPagoId === proximoPago.id"
+                                        (click)="pagarConPaypal(proximoPago.id)">
+                                    <i class="bi bi-paypal me-1"></i> Pagar con PayPal
+                                </button>
+                            </div>
                         </div>
                         <div *ngIf="!proximoPago" class="text-muted py-3">
                             <i class="bi bi-check-circle fs-1 text-success"></i>
