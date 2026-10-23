@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { ClientesService, Cliente, ClienteFormData } from '../../../services/admin/clientes';
+import { PlanService } from '../../../services/plan.service';
 
 declare var bootstrap: any;
 
@@ -33,6 +34,7 @@ export class ClientesComponent implements OnInit {
 
   constructor(
     private clientesService: ClientesService,
+    private planService: PlanService,
     private authService: AuthService,
     private router: Router,
     private cdr: ChangeDetectorRef
@@ -60,12 +62,13 @@ export class ClientesComponent implements OnInit {
   }
 
   cargarPlanes(): void {
-    // Por ahora datos de ejemplo
-    this.planes = [
-      { id: 1, nombre: 'Plan Básico', velocidad: '10 Mbps', precio: 29.99 },
-      { id: 2, nombre: 'Plan Estándar', velocidad: '50 Mbps', precio: 49.99 },
-      { id: 3, nombre: 'Plan Premium', velocidad: '100 Mbps', precio: 79.99 }
-    ];
+    this.planService.getPlanes().subscribe({
+      next: (data) => {
+        this.planes = data.filter(p => p.activo !== false);
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error al cargar planes en clientes:', err)
+    });
   }
 
   abrirModalNuevoCliente(): void {

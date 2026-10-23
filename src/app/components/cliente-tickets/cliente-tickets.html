@@ -133,14 +133,34 @@
                 <p><strong>ID:</strong> {{ ticketSeleccionado?.id }}</p>
                 <p><strong>Asunto:</strong> {{ ticketSeleccionado?.asunto }}</p>
                 <p><strong>Descripción:</strong> {{ ticketSeleccionado?.descripcion }}</p>
-                <p><strong>Estado:</strong> {{ ticketSeleccionado?.estado }}</p>
-                <p><strong>Prioridad:</strong> {{ ticketSeleccionado?.prioridad }}</p>
-                <p><strong>Creado:</strong> {{ ticketSeleccionado?.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
+                <div class="d-flex justify-content-between mb-2">
+                    <span><strong>Estado:</strong> 
+                        <span class="badge" [ngClass]="{
+                            'bg-secondary': ticketSeleccionado?.estado === 'cerrado',
+                            'bg-primary': ticketSeleccionado?.estado === 'abierto',
+                            'bg-warning text-dark': ticketSeleccionado?.estado === 'en_proceso',
+                            'bg-success': ticketSeleccionado?.estado === 'resuelto'
+                        }">{{ ticketSeleccionado?.estado }}</span>
+                    </span>
+                    <span><strong>Prioridad:</strong> 
+                        <span class="badge" [ngClass]="{
+                            'bg-danger': ticketSeleccionado?.prioridad === 'alta',
+                            'bg-warning text-dark': ticketSeleccionado?.prioridad === 'media',
+                            'bg-info': ticketSeleccionado?.prioridad === 'baja'
+                        }">{{ ticketSeleccionado?.prioridad }}</span>
+                    </span>
+                </div>
+                <p class="text-muted small"><strong>Fecha Creación:</strong> {{ ticketSeleccionado?.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
                 <hr>
-                <!--<div class="alert alert-success">
-                    <i class="bi bi-chat-dots me-2"></i>
-                    {{ ticketSeleccionado?.respuesta || 'Aún no hay respuesta' }}
-                </div> -->
+                <div *ngIf="ticketSeleccionado?.respuesta" class="alert alert-success shadow-sm">
+                    <h6 class="alert-heading fw-bold mb-1">
+                        <i class="bi bi-chat-dots-fill me-2"></i>Respuesta del Soporte Técnico:
+                    </h6>
+                    <p class="mb-0">{{ ticketSeleccionado?.respuesta }}</p>
+                </div>
+                <div *ngIf="!ticketSeleccionado?.respuesta" class="alert alert-light border text-muted">
+                    <i class="bi bi-clock-history me-2"></i>El equipo de soporte aún está atendiendo tu solicitud.
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>

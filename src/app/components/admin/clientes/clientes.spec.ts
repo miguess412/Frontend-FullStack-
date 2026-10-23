@@ -7,6 +7,7 @@ import { vi } from 'vitest';
 import { ClientesComponent } from './clientes';
 import { ClientesService, Cliente } from '../../../services/admin/clientes';
 import { AuthService } from '../../../services/auth.service';
+import { PlanService } from '../../../services/plan.service';
 
 declare var bootstrap: any;
 
@@ -48,6 +49,7 @@ describe('ClientesComponent', () => {
   let clientesService: ClientesService;
   let authService: AuthService;
   let router: Router;
+  let planService: PlanService;
 
   const mockClientes: Cliente[] = [
     {
@@ -73,8 +75,10 @@ describe('ClientesComponent', () => {
     clientesService = TestBed.inject(ClientesService);
     authService = TestBed.inject(AuthService);
     router = TestBed.inject(Router);
+    planService = TestBed.inject(PlanService);
     
     vi.spyOn(clientesService, 'getClientes').mockReturnValue(of(mockClientes));
+    vi.spyOn(planService, 'getPlanes').mockReturnValue(of([{ id: 1, nombre: 'Básico', velocidad: '10 Mbps', precio: 40000, descripcion: '', activo: true }]));
     fixture.detectChanges();
   });
 

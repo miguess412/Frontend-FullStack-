@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { TicketService, Ticket } from '../../services/ticket.service';
-import * as bootstrap from 'bootstrap';
+
+declare var bootstrap: any;
 
 @Component({
   selector: 'app-cliente-tickets',
@@ -13,14 +14,14 @@ import * as bootstrap from 'bootstrap';
   templateUrl: './cliente-tickets.html',
   styleUrls: ['./cliente-tickets.css']
 })
-
-export class ClienteTicketsComponent implements OnInit, OnDestroy  {
+export class ClienteTicketsComponent implements OnInit, OnDestroy {
   private refreshInterval: any;
   
   tickets: Ticket[] = [];
   ticketSeleccionado: Ticket | null = null;
   nuevoTicket = { asunto: '', descripcion: '', prioridad: 'media' };
   loading = true;
+  creando = false;
 
   constructor(
     private authService: AuthService,
@@ -31,10 +32,10 @@ export class ClienteTicketsComponent implements OnInit, OnDestroy  {
 
   ngOnInit(): void {
     this.cargarTickets();
-    // Recargar automáticamente cada 5 segundos
-    setInterval(() => {
-        this.cargarTickets();
-    }, 5000);
+    // Recargar periódicamente cada 10 segundos
+    this.refreshInterval = setInterval(() => {
+      this.cargarTicketsSilencioso();
+    }, 10000);
   }
 
   ngOnDestroy(): void {
@@ -45,7 +46,7 @@ export class ClienteTicketsComponent implements OnInit, OnDestroy  {
 
   recargarTickets(): void {
     this.cargarTickets();
-}
+  }
 
   cargarTickets(): void {
     this.loading = true;
@@ -58,34 +59,63 @@ export class ClienteTicketsComponent implements OnInit, OnDestroy  {
       error: (err) => {
         console.error('Error cargando tickets:', err);
         this.loading = false;
+        this.cdr.detectChanges();
       }
+    });
+  }
+
+  cargarTicketsSilencioso(): void {
+    this.ticketService.getMisTickets().subscribe({
+      next: (data) => {
+        this.tickets = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error en recarga silenciosa de tickets:', err)
     });
   }
 
   abrirModalNuevoTicket(): void {
     this.nuevoTicket = { asunto: '', descripcion: '', prioridad: 'media' };
-    const modal = new bootstrap.Modal(document.getElementById('nuevoTicketModal'));
-    modal.show();
+    const modalEl = document.getElementById('nuevoTicketModal');
+    if (modalEl) {
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.show();
+    }
   }
 
   crearTicket(): void {
+    if (!this.nuevoTicket.asunto.trim() || !this.nuevoTicket.descripcion.trim()) {
+      alert('Por favor ingresa el asunto y la descripción del problema');
+      return;
+    }
+
+    this.creando = true;
     this.ticketService.crearTicket(this.nuevoTicket).subscribe({
       next: () => {
-        const modal = bootstrap.Modal.getInstance(document.getElementById('nuevoTicketModal'));
-        modal?.hide();
+        this.creando = false;
+        const modalEl = document.getElementById('nuevoTicketModal');
+        if (modalEl) {
+          const modal = bootstrap.Modal.getInstance(modalEl);
+          modal?.hide();
+        }
+        this.nuevoTicket = { asunto: '', descripcion: '', prioridad: 'media' };
         this.cargarTickets();
       },
       error: (err) => {
+        this.creando = false;
         console.error('Error creando ticket:', err);
-        alert('Error al crear el ticket');
+        alert(err.error?.message || 'Error al crear el ticket de soporte');
       }
     });
   }
 
   verDetalle(ticket: Ticket): void {
     this.ticketSeleccionado = ticket;
-    const modal = new bootstrap.Modal(document.getElementById('detalleTicketModal'));
-    modal.show();
+    const modalEl = document.getElementById('detalleTicketModal');
+    if (modalEl) {
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.show();
+    }
   }
 
   logout(): void {

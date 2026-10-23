@@ -6,6 +6,7 @@ import { AuthService } from '../../services/auth.service';
 import { ClienteService, FacturaCliente, PlanCliente, ConsumoCliente } from '../../services/cliente';
 import { User } from '../../models/user.model';
 import { PagoService } from '../../services/pago.service';
+import { TicketService } from '../../services/ticket.service';
 
 @Component({
   selector: 'app-dashboard-cliente',
@@ -36,6 +37,7 @@ export class DashboardClienteComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private clienteService: ClienteService,
+    private ticketService: TicketService,
     private pagoService: PagoService,
     private router: Router,
     private cdr: ChangeDetectorRef  
@@ -94,6 +96,15 @@ export class DashboardClienteComponent implements OnInit {
 
     // Cargar planes disponibles para cambio (HU12)
     this.cargarPlanesDisponibles();
+
+    // Cargar cantidad de tickets activos
+    this.ticketService.getMisTickets().subscribe({
+      next: (tickets) => {
+        this.ticketsActivos = tickets.filter(t => t.estado === 'abierto' || t.estado === 'en_proceso').length;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error cargando conteo de tickets:', err)
+    });
   }
 
   cargarConsumo(): void {
@@ -238,7 +249,7 @@ export class DashboardClienteComponent implements OnInit {
   }
 
   nuevoTicket(): void {
-    alert('Funcionalidad en desarrollo: Crear ticket de soporte');
+    this.router.navigate(['/cliente/tickets']);
   }
 
   logout(): void {
