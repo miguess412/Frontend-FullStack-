@@ -10,6 +10,7 @@ import { ClienteTicketsComponent } from './components/cliente-tickets/cliente-ti
 import { AdminTicketsComponent } from './components/admin-tickets/admin-tickets';
 import { PlanesComponent } from './components/admin/planes/planes';
 import { ClientePerfilComponent } from './components/cliente-perfil/cliente-perfil';
+import { BackupsComponent } from './components/admin/backups/backups';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -24,5 +25,6 @@ export const routes: Routes = [
   { path: 'admin/tickets', component: AdminTicketsComponent },
   { path: 'admin/planes', component: PlanesComponent },
   { path: 'cliente/perfil', component: ClientePerfilComponent },
+  { path: 'admin/backups', component: BackupsComponent },
   { path: '**', redirectTo: '/login' }
 ];
