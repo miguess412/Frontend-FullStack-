@@ -1,32 +1,35 @@
 <div class="container-fluid">
     <!-- Navbar -->
-    <nav class="navbar navbar-dark bg-success mb-4 shadow-sm">
-        <div class="container-fluid">
+    <nav class="navbar navbar-dark bg-success mb-4 shadow-sm px-3 rounded-bottom">
+        <div class="container-fluid p-0">
             <span class="navbar-brand mb-0 h1">
                 <i class="bi bi-wifi me-2"></i>
-                Mi ISP - Área de Cliente
+                {{ 'COMMON.APP_NAME' | translate }} - {{ 'CLIENT_DASHBOARD.TITLE' | translate }}
             </span>
-            <div class="d-flex align-items-center">
-                <a routerLink="/cliente/perfil" class="navbar-text me-3 text-white text-decoration-none">
+            <div class="d-flex align-items-center gap-3">
+                <!-- Selector de Idioma (i18n) -->
+                <app-language-selector></app-language-selector>
+
+                <a routerLink="/cliente/perfil" class="navbar-text text-white text-decoration-none">
                     <i class="bi bi-person-circle me-1"></i>
                     {{ currentUser?.nombre }}
                 </a>
                 <button class="btn btn-outline-light btn-sm" (click)="logout()">
                     <i class="bi bi-box-arrow-right me-1"></i>
-                    Cerrar Sesión
+                    {{ 'COMMON.LOGOUT' | translate }}
                 </button>
             </div>
         </div>
     </nav>
 
     <!-- Alertas informativas -->
-    <div *ngIf="mensajeExito" class="alert alert-success alert-dismissible fade show" role="alert">
+    <div *ngIf="mensajeExito" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
         <i class="bi bi-check-circle-fill me-2"></i>
         {{ mensajeExito }}
         <button type="button" class="btn-close" (click)="mensajeExito = ''"></button>
     </div>
 
-    <div *ngIf="mensajeError" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <div *ngIf="mensajeError" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
         {{ mensajeError }}
         <button type="button" class="btn-close" (click)="mensajeError = ''"></button>
@@ -35,13 +38,13 @@
     <!-- Estado de carga -->
     <div *ngIf="loading" class="text-center py-5">
         <div class="spinner-border text-success" role="status">
-            <span class="visually-hidden">Cargando...</span>
+            <span class="visually-hidden">{{ 'COMMON.LOADING' | translate }}</span>
         </div>
-        <p class="mt-2 text-muted">Cargando tu información...</p>
+        <p class="mt-2 text-muted">{{ 'COMMON.LOADING' | translate }}</p>
     </div>
 
     <!-- Error general -->
-    <div *ngIf="error" class="alert alert-danger">
+    <div *ngIf="error" class="alert alert-danger shadow-sm">
         <i class="bi bi-exclamation-triangle me-2"></i>
         Error al cargar los datos. Por favor, recarga la página.
     </div>
@@ -55,9 +58,9 @@
                 <div class="card h-100 shadow-sm border-0 border-top border-primary border-4">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                         <span class="fw-bold text-primary">
-                            <i class="bi bi-speedometer2 me-1"></i> Mi Plan Actual
+                            <i class="bi bi-speedometer2 me-1"></i> {{ 'CLIENT_DASHBOARD.MY_PLAN' | translate }}
                         </span>
-                        <span class="badge bg-primary">Activo</span>
+                        <span class="badge bg-primary">{{ 'COMMON.ACTIVE' | translate }}</span>
                     </div>
                     <div class="card-body">
                         <div *ngIf="miPlan">
@@ -69,12 +72,12 @@
                                 <strong>{{ miPlan.velocidad }}</strong>
                             </div>
                             <div class="d-flex justify-content-between mb-3">
-                                <span class="text-muted">Tarifa mensual:</span>
+                                <span class="text-muted">Tarifa:</span>
                                 <strong class="text-success">{{ formatMoney(miPlan.precio) }}</strong>
                             </div>
                             <!-- HU12: Botón Cambiar Plan -->
-                            <button class="btn btn-outline-primary btn-sm w-100" (click)="abrirModalCambioPlan()">
-                                <i class="bi bi-arrow-repeat me-1"></i> Cambiar de Plan
+                            <button class="btn btn-outline-primary btn-sm w-100" (click)="abrirModalCambiarPlan()">
+                                <i class="bi bi-arrow-repeat me-1"></i> {{ 'CLIENT_DASHBOARD.CHANGE_PLAN' | translate }}
                             </button>
                         </div>
                         <div *ngIf="!miPlan" class="text-muted text-center py-3">
@@ -90,15 +93,15 @@
                 <div class="card h-100 shadow-sm border-0 border-top border-info border-4">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                         <span class="fw-bold text-info">
-                            <i class="bi bi-activity me-1"></i> Consumo de Internet
+                            <i class="bi bi-activity me-1"></i> {{ 'CLIENT_DASHBOARD.INTERNET_USAGE' | translate }}
                         </span>
-                        <span class="badge bg-info text-white">{{ consumo?.estadoServicio || 'Activo' }}</span>
+                        <span class="badge bg-info text-white">{{ consumo?.estadoServicio || ('COMMON.ACTIVE' | translate) }}</span>
                     </div>
                     <div class="card-body">
                         <div *ngIf="consumo">
                             <div class="d-flex justify-content-between align-items-baseline mb-1">
                                 <span class="h4 mb-0 text-dark">{{ consumo.gigasConsumidos }} GB</span>
-                                <span class="text-muted small">de {{ consumo.gigasTotales }} GB</span>
+                                <span class="text-muted small">{{ 'CLIENT_DASHBOARD.USED_OF' | translate }} {{ consumo.gigasTotales }} GB</span>
                             </div>
                             <div class="progress mb-2" style="height: 10px;">
                                 <div class="progress-bar" 
@@ -111,12 +114,12 @@
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between small text-muted mb-2">
-                                <span>{{ consumo.porcentajeConsumo }}% consumido</span>
-                                <span>{{ consumo.diasRestantesCiclo }} días de ciclo</span>
+                                <span>{{ consumo.porcentajeConsumo }}% {{ 'CLIENT_DASHBOARD.CONSUMED' | translate }}</span>
+                                <span>{{ consumo.diasRestantesCiclo }} {{ 'CLIENT_DASHBOARD.CYCLE_DAYS' | translate }}</span>
                             </div>
                             <hr class="my-2">
                             <div class="small text-muted">
-                                <i class="bi bi-calendar-event me-1"></i> Periodo: {{ consumo.periodo }}
+                                <i class="bi bi-calendar-event me-1"></i> {{ 'CLIENT_DASHBOARD.PERIOD' | translate }}: {{ consumo.periodo }}
                             </div>
                         </div>
                         <div *ngIf="!consumo" class="text-muted text-center py-3">
@@ -132,14 +135,14 @@
                 <div class="card h-100 shadow-sm border-0 border-top border-warning border-4">
                     <div class="card-header bg-white">
                         <span class="fw-bold text-warning">
-                            <i class="bi bi-credit-card me-1"></i> Próximo Pago
+                            <i class="bi bi-credit-card me-1"></i> {{ 'CLIENT_DASHBOARD.NEXT_PAYMENT' | translate }}
                         </span>
                     </div>
                     <div class="card-body text-center d-flex flex-column justify-content-between">
                         <div *ngIf="proximoPago">
                             <h2 class="text-warning mb-1">{{ formatMoney(proximoPago.monto) }}</h2>
                             <p class="text-muted small mb-3">
-                                <strong>Vence:</strong> {{ formatDate(proximoPago.fecha_vencimiento) }}
+                                <strong>{{ 'CLIENT_DASHBOARD.EXPIRES' | translate }}:</strong> {{ formatDate(proximoPago.fecha_vencimiento) }}
                             </p>
                             <!-- HU14 / HU24: Pagar Factura Pendiente -->
                             <div class="d-grid gap-2">
@@ -148,20 +151,20 @@
                                         (click)="pagarAhora()">
                                     <span *ngIf="procesandoPagoId === proximoPago.id" class="spinner-border spinner-border-sm me-1"></span>
                                     <i *ngIf="procesandoPagoId !== proximoPago.id" class="bi bi-wallet2 me-1"></i>
-                                    Pagar (Simulado)
+                                    {{ 'CLIENT_DASHBOARD.PAY_SIMULATED' | translate }}
                                 </button>
                                 <button class="btn btn-outline-primary w-100 fw-bold btn-sm"
                                         title="Pagar con PayPal Sandbox"
                                         [disabled]="procesandoPagoId === proximoPago.id"
                                         (click)="pagarConPaypal(proximoPago.id)">
-                                    <i class="bi bi-paypal me-1"></i> Pagar con PayPal
+                                    <i class="bi bi-paypal me-1"></i> {{ 'CLIENT_DASHBOARD.PAY_WITH_PAYPAL' | translate }}
                                 </button>
                             </div>
                         </div>
                         <div *ngIf="!proximoPago" class="text-muted py-3">
                             <i class="bi bi-check-circle fs-1 text-success"></i>
-                            <p class="mt-2 mb-0 fw-bold text-success">¡Todo al día!</p>
-                            <small class="text-muted">No tienes facturas pendientes</small>
+                            <p class="mt-2 mb-0 fw-bold text-success">{{ 'CLIENT_DASHBOARD.ALL_UP_TO_DATE' | translate }}</p>
+                            <small class="text-muted">{{ 'CLIENT_DASHBOARD.NO_PENDING_INVOICES' | translate }}</small>
                         </div>
                     </div>
                 </div>
@@ -172,16 +175,16 @@
                 <div class="card h-100 shadow-sm border-0 border-top border-secondary border-4">
                     <div class="card-header bg-white">
                         <span class="fw-bold text-secondary">
-                            <i class="bi bi-ticket-perforated me-1"></i> Soporte y Tickets
+                            <i class="bi bi-ticket-perforated me-1"></i> {{ 'CLIENT_DASHBOARD.SUPPORT_AND_TICKETS' | translate }}
                         </span>
                     </div>
                     <div class="card-body text-center d-flex flex-column justify-content-between">
                         <div>
                             <h2 class="text-secondary mb-1">{{ ticketsActivos }}</h2>
-                            <p class="text-muted small">Tickets activos de soporte</p>
+                            <p class="text-muted small">{{ 'CLIENT_DASHBOARD.ACTIVE_SUPPORT_TICKETS' | translate }}</p>
                         </div>
                         <a routerLink="/cliente/tickets" class="btn btn-outline-secondary btn-sm w-100">
-                            <i class="bi bi-plus-circle me-1"></i> Gestionar Tickets
+                            <i class="bi bi-plus-circle me-1"></i> {{ 'CLIENT_DASHBOARD.MANAGE_TICKETS' | translate }}
                         </a>
                     </div>
                 </div>
@@ -193,7 +196,7 @@
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-dark">
                     <i class="bi bi-receipt me-2 text-success"></i>
-                    Historial de Facturas
+                    {{ 'CLIENT_DASHBOARD.INVOICE_HISTORY' | translate }}
                 </h5>
                 <span class="badge bg-light text-dark border">
                     Total: {{ misFacturas.length }}
@@ -204,13 +207,13 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th># Factura</th>
-                                <th>Monto</th>
-                                <th>Estado</th>
-                                <th>Fecha Emisión</th>
-                                <th>Fecha Vencimiento</th>
-                                <th>Fecha Pago</th>
-                                <th class="text-center">Acciones</th>
+                                <th>{{ 'CLIENT_DASHBOARD.INVOICE_NUMBER' | translate }}</th>
+                                <th>{{ 'CLIENT_DASHBOARD.AMOUNT' | translate }}</th>
+                                <th>{{ 'COMMON.STATUS' | translate }}</th>
+                                <th>{{ 'CLIENT_DASHBOARD.ISSUE_DATE' | translate }}</th>
+                                <th>{{ 'CLIENT_DASHBOARD.DUE_DATE' | translate }}</th>
+                                <th>{{ 'CLIENT_DASHBOARD.PAYMENT_DATE' | translate }}</th>
+                                <th class="text-center">{{ 'COMMON.ACTIONS' | translate }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -220,7 +223,7 @@
                                 <td>
                                     <span class="badge" [ngClass]="factura.estado === 'pagada' ? 'bg-success' : 'bg-warning text-dark'">
                                         <i class="bi" [ngClass]="factura.estado === 'pagada' ? 'bi-check-circle-fill' : 'bi-clock-fill'"></i>
-                                        {{ factura.estado === 'pagada' ? 'Pagada' : 'Pendiente' }}
+                                        {{ factura.estado === 'pagada' ? ('CLIENT_DASHBOARD.PAID_STATUS' | translate) : ('CLIENT_DASHBOARD.PENDING_STATUS' | translate) }}
                                     </span>
                                 </td>
                                 <td>{{ formatDate(factura.fecha_emision) }}</td>
@@ -239,7 +242,7 @@
                                                 (click)="pagarFactura(factura.id)">
                                             <span *ngIf="procesandoPagoId === factura.id" class="spinner-border spinner-border-sm me-1"></span>
                                             <i *ngIf="procesandoPagoId !== factura.id" class="bi bi-check-lg me-1"></i>
-                                            Pagar (Simulado)
+                                            {{ 'CLIENT_DASHBOARD.PAY_SIMULATED' | translate }}
                                         </button>
                                         <button class="btn btn-outline-primary"
                                                 title="Pagar con PayPal (Pasarela externa)"
@@ -249,14 +252,14 @@
                                         </button>
                                     </div>
                                     <span *ngIf="factura.estado === 'pagada'" class="text-success fw-bold">
-                                        <i class="bi bi-check-all fs-5 text-success"></i> Pagada
+                                        <i class="bi bi-check-all fs-5 text-success"></i> {{ 'CLIENT_DASHBOARD.PAID_STATUS' | translate }}
                                     </span>
                                 </td>
                             </tr>
                             <tr *ngIf="misFacturas.length === 0">
                                 <td colspan="7" class="text-center text-muted py-5">
                                     <i class="bi bi-inbox fs-1 text-secondary opacity-50"></i>
-                                    <p class="mt-2 mb-0">No hay facturas registradas en el sistema</p>
+                                    <p class="mt-2 mb-0">{{ 'CLIENT_DASHBOARD.NO_INVOICES' | translate }}</p>
                                 </td>
                             </tr>
                         </tbody>
@@ -276,9 +279,9 @@
         <div class="modal-content shadow">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
-                    <i class="bi bi-arrow-repeat me-2"></i> Cambiar Plan de Internet (HU12)
+                    <i class="bi bi-arrow-repeat me-2"></i> {{ 'CLIENT_DASHBOARD.CHANGE_PLAN' | translate }}
                 </h5>
-                <button type="button" class="btn-close btn-close-white" (click)="cerrarModalCambioPlan()"></button>
+                <button type="button" class="btn-close btn-close-white" (click)="cerrarModalPlan()"></button>
             </div>
             <div class="modal-body p-4">
                 <p class="text-muted">
@@ -306,13 +309,13 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="cerrarModalCambioPlan()">Cancelar</button>
+                <button type="button" class="btn btn-secondary" (click)="cerrarModalPlan()">{{ 'COMMON.CANCEL' | translate }}</button>
                 <button type="button" class="btn btn-primary" 
                         [disabled]="cambiandoPlan || !nuevoPlanSeleccionadoId || nuevoPlanSeleccionadoId === miPlan?.id"
                         (click)="confirmarCambioPlan()">
                     <span *ngIf="cambiandoPlan" class="spinner-border spinner-border-sm me-1"></span>
                     <i *ngIf="!cambiandoPlan" class="bi bi-check-circle me-1"></i>
-                    Confirmar Cambio de Plan
+                    {{ 'CLIENT_DASHBOARD.CHANGE_PLAN' | translate }}
                 </button>
             </div>
         </div>

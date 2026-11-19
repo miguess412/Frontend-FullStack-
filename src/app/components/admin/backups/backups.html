@@ -4,16 +4,17 @@
         <div class="container-fluid p-0">
             <span class="navbar-brand mb-0 h1">
                 <i class="bi bi-database-fill-check me-2"></i>
-                ISP-Manager - Copias de Seguridad (Backups)
+                {{ 'COMMON.APP_NAME' | translate }} - {{ 'BACKUPS.TITLE' | translate }}
             </span>
-            <div class="d-flex align-items-center">
-                <button class="btn btn-outline-light btn-sm me-2" routerLink="/admin/dashboard">
+            <div class="d-flex align-items-center gap-2">
+                <app-language-selector></app-language-selector>
+                <button class="btn btn-outline-light btn-sm ms-2" routerLink="/admin/dashboard">
                     <i class="bi bi-arrow-left me-1"></i>
-                    Volver al Dashboard
+                    {{ 'COMMON.BACK' | translate }}
                 </button>
                 <button class="btn btn-outline-light btn-sm" (click)="logout()">
                     <i class="bi bi-box-arrow-right me-1"></i>
-                    Cerrar Sesión
+                    {{ 'COMMON.LOGOUT' | translate }}
                 </button>
             </div>
         </div>
@@ -38,11 +39,11 @@
                     <div>
                         <h5 class="card-title text-primary mb-1">
                             <i class="bi bi-shield-lock me-2"></i>
-                            Respaldo Completo de Base de Datos MySQL
+                            {{ 'BACKUPS.CARD_TITLE' | translate }}
                         </h5>
                         <p class="card-text text-muted small mb-0">
-                            Genera un volcado SQL estructurado con DDL y datos de las tablas:
-                            <code>roles</code>, <code>users</code>, <code>planes</code>, <code>clientes</code>, <code>facturas</code> y <code>tickets_soporte</code>.
+                            {{ 'BACKUPS.CARD_DESC' | translate }}
+                            (<code>roles</code>, <code>users</code>, <code>planes</code>, <code>clientes</code>, <code>facturas</code>, <code>tickets_soporte</code>)
                         </p>
                     </div>
                     <div>
@@ -51,7 +52,7 @@
                                 (click)="generarBackup()">
                             <span *ngIf="generando" class="spinner-border spinner-border-sm me-2" role="status"></span>
                             <i *ngIf="!generando" class="bi bi-cloud-arrow-up-fill me-2"></i>
-                            {{ generando ? 'Generando Backup...' : 'Crear Nueva Copia (.SQL)' }}
+                            {{ generando ? ('BACKUPS.CREATING' | translate) : ('BACKUPS.CREATE_BUTTON' | translate) }}
                         </button>
                     </div>
                 </div>
@@ -64,24 +65,24 @@
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0 text-dark">
                 <i class="bi bi-archive-fill text-secondary me-2"></i>
-                Historial de Copias de Seguridad
+                {{ 'BACKUPS.HISTORY' | translate }}
             </h5>
             <span class="badge bg-secondary">
-                Total: {{ backups.length }}
+                {{ 'BACKUPS.TOTAL' | translate }}: {{ backups.length }}
             </span>
         </div>
         <div class="card-body p-0">
             <div *ngIf="cargando" class="text-center py-5">
                 <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Cargando...</span>
+                    <span class="visually-hidden">{{ 'COMMON.LOADING' | translate }}</span>
                 </div>
-                <p class="mt-2 text-muted small">Cargando copias de seguridad...</p>
+                <p class="mt-2 text-muted small">{{ 'COMMON.LOADING' | translate }}</p>
             </div>
 
             <div *ngIf="!cargando && backups.length === 0" class="text-center py-5 text-muted">
                 <i class="bi bi-database-slash fs-1 text-secondary opacity-50"></i>
-                <p class="mt-2 mb-1 fw-bold">No hay copias de seguridad registradas</p>
-                <small class="text-muted">Haz clic en "Crear Nueva Copia (.SQL)" para realizar el primer respaldo.</small>
+                <p class="mt-2 mb-1 fw-bold">{{ 'BACKUPS.NO_BACKUPS' | translate }}</p>
+                <small class="text-muted">Haz clic en "{{ 'BACKUPS.CREATE_BUTTON' | translate }}" para realizar el primer respaldo.</small>
             </div>
 
             <div *ngIf="!cargando && backups.length > 0" class="table-responsive">
@@ -89,11 +90,11 @@
                     <thead class="table-light">
                         <tr>
                             <th class="ps-3">#</th>
-                            <th>Nombre del Archivo</th>
-                            <th>Tamaño</th>
-                            <th>Fecha y Hora</th>
-                            <th>Tipo</th>
-                            <th class="text-center pe-3">Acciones</th>
+                            <th>{{ 'BACKUPS.FILENAME' | translate }}</th>
+                            <th>{{ 'BACKUPS.SIZE' | translate }}</th>
+                            <th>{{ 'BACKUPS.DATE_TIME' | translate }}</th>
+                            <th>{{ 'BACKUPS.TYPE' | translate }}</th>
+                            <th class="text-center pe-3">{{ 'COMMON.ACTIONS' | translate }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -122,9 +123,9 @@
                             <td class="text-center pe-3">
                                 <div class="btn-group btn-group-sm">
                                     <button class="btn btn-outline-primary" 
-                                            title="Descargar archivo .sql al computador"
+                                            title="Descargar archivo .sql"
                                             (click)="descargar(item)">
-                                        <i class="bi bi-download me-1"></i> Descargar
+                                        <i class="bi bi-download me-1"></i> {{ 'COMMON.DOWNLOAD' | translate }}
                                     </button>
                                     <button class="btn btn-outline-danger" 
                                             title="Eliminar este respaldo"

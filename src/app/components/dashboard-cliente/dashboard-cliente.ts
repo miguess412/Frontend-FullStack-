@@ -7,11 +7,14 @@ import { ClienteService, FacturaCliente, PlanCliente, ConsumoCliente } from '../
 import { User } from '../../models/user.model';
 import { PagoService } from '../../services/pago.service';
 import { TicketService } from '../../services/ticket.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { LanguageSelectorComponent } from '../language-selector/language-selector';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-dashboard-cliente',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, TranslatePipe, LanguageSelectorComponent],
   templateUrl: './dashboard-cliente.html',
   styleUrls: ['./dashboard-cliente.css']
 })
@@ -40,7 +43,8 @@ export class DashboardClienteComponent implements OnInit {
     private ticketService: TicketService,
     private pagoService: PagoService,
     private router: Router,
-    private cdr: ChangeDetectorRef  
+    private cdr: ChangeDetectorRef,
+    public translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
@@ -51,6 +55,10 @@ export class DashboardClienteComponent implements OnInit {
       if (user) {
         this.cargarDatosCliente();
       }
+    });
+
+    this.translationService.currentLang$.subscribe(() => {
+      this.cdr.detectChanges();
     });
   }
 
@@ -80,82 +88,65 @@ export class DashboardClienteComponent implements OnInit {
       }
     });
 
-    // Cargar plan (HU9)
+    // Cargar plan contratado (HU9)
     this.clienteService.getMiPlan().subscribe({
       next: (plan) => {
         this.miPlan = plan;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error al cargar plan:', err);
-      }
+      error: (err) => console.error('Error al cargar plan:', err)
     });
 
-    // Cargar consumo (HU10)
-    this.cargarConsumo();
+    // Cargar consumo de internet (HU10)
+    this.clienteService.getMiConsumo().subscribe({
+      next: (consumo) => {
+        this.consumo = consumo;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error al cargar consumo:', err)
+    });
 
     // Cargar planes disponibles para cambio (HU12)
-    this.cargarPlanesDisponibles();
+    this.clienteService.getPlanesDisponibles().subscribe({
+      next: (planes) => {
+        this.planesDisponibles = planes;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error al cargar planes disponibles:', err)
+    });
 
-    // Cargar cantidad de tickets activos
+    // Cargar tickets de soporte para contador en dashboard
     this.ticketService.getMisTickets().subscribe({
       next: (tickets) => {
         this.ticketsActivos = tickets.filter(t => t.estado === 'abierto' || t.estado === 'en_proceso').length;
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Error cargando conteo de tickets:', err)
-    });
-  }
-
-  cargarConsumo(): void {
-    this.clienteService.getMiConsumo().subscribe({
-      next: (consumoData) => {
-        this.consumo = consumoData;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error al cargar consumo:', err);
-      }
-    });
-  }
-
-  cargarPlanesDisponibles(): void {
-    this.clienteService.getPlanesDisponibles().subscribe({
-      next: (planes) => {
-        // Filtrar solo los planes activos
-        this.planesDisponibles = planes.filter(p => p.activo !== false);
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error al cargar planes disponibles:', err);
-      }
+      error: (err) => console.error('Error cargando tickets de cliente:', err)
     });
   }
 
   // ============================================
-  // HU12: CAMBIAR DE PLAN
+  // HU12: MODAL Y CAMBIO DE PLAN
   // ============================================
-  abrirModalCambioPlan(): void {
+  abrirModalCambiarPlan(): void {
     this.nuevoPlanSeleccionadoId = this.miPlan ? this.miPlan.id : null;
     this.mostrarModalPlan = true;
-    if (this.planesDisponibles.length === 0) {
-      this.cargarPlanesDisponibles();
-    }
+    this.mensajeError = '';
   }
 
-  cerrarModalCambioPlan(): void {
+  cerrarModalPlan(): void {
     this.mostrarModalPlan = false;
-    this.cambiandoPlan = false;
+    this.nuevoPlanSeleccionadoId = null;
   }
 
   confirmarCambioPlan(): void {
     if (!this.nuevoPlanSeleccionadoId) {
-      alert('Por favor selecciona un plan');
+      this.mensajeError = 'Debes seleccionar un plan';
       return;
     }
 
-    if (this.miPlan && this.nuevoPlanSeleccionadoId === this.miPlan.id) {
-      alert('Ya tienes este plan contratado');
+    if (this.miPlan && this.miPlan.id === this.nuevoPlanSeleccionadoId) {
+      this.mensajeError = 'Ya tienes contratado este plan';
       return;
     }
 
@@ -164,30 +155,29 @@ export class DashboardClienteComponent implements OnInit {
       next: (res) => {
         this.cambiandoPlan = false;
         this.mostrarModalPlan = false;
-        this.miPlan = res.plan;
-        this.mensajeExito = `¡Plan cambiado con éxito a ${res.plan.nombre}!`;
-        // Actualizar consumo y métricas acordes al nuevo plan
-        this.cargarConsumo();
+        this.mensajeExito = `✅ ${res.message || 'Plan actualizado con éxito'}`;
+        
+        // Actualizar plan y consumo en la vista
+        if (res.plan) {
+          this.miPlan = res.plan;
+        }
+        this.clienteService.getMiConsumo().subscribe(c => this.consumo = c);
         this.cdr.detectChanges();
-        setTimeout(() => { this.mensajeExito = ''; this.cdr.detectChanges(); }, 6000);
+        setTimeout(() => { this.mensajeExito = ''; this.cdr.detectChanges(); }, 5000);
       },
       error: (err) => {
         this.cambiandoPlan = false;
-        console.error('Error al cambiar plan:', err);
-        alert(err.error?.message || 'Error al cambiar de plan');
+        console.error('Error al cambiar de plan:', err);
+        this.mensajeError = err.error?.message || 'Error al cambiar de plan';
         this.cdr.detectChanges();
       }
     });
   }
 
   // ============================================
-  // HU14: PAGOS SIMULADOS
+  // HU14: PAGAR FACTURA (SIMULADO EN MYSQL)
   // ============================================
   pagarFactura(facturaId: number): void {
-    if (!confirm(`¿Deseas realizar el pago simulado de la factura #${facturaId}?`)) {
-      return;
-    }
-
     this.procesandoPagoId = facturaId;
     this.mensajeError = '';
 
@@ -227,7 +217,7 @@ export class DashboardClienteComponent implements OnInit {
   }
 
   // ============================================
-  // HU24: PAGAR CON PAYPAL (OPCIONAL / EXTERNO)
+  // HU24: PAGAR CON PAYPAL (PASARELA EXTERNA)
   // ============================================
   pagarConPaypal(facturaId: number): void {
     this.procesandoPagoId = facturaId;
@@ -259,9 +249,10 @@ export class DashboardClienteComponent implements OnInit {
 
   formatMoney(value: number | string): string {
     const num = typeof value === 'string' ? parseFloat(value) : value;
-    return new Intl.NumberFormat('es-CO', {
+    const isEn = this.translationService.currentLanguage === 'en';
+    return new Intl.NumberFormat(isEn ? 'en-US' : 'es-CO', {
       style: 'currency',
-      currency: 'COP',
+      currency: isEn ? 'USD' : 'COP',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(num);
@@ -270,6 +261,7 @@ export class DashboardClienteComponent implements OnInit {
   formatDate(dateStr: string | null | undefined): string {
     if (!dateStr) return 'N/A';
     const date = new Date(dateStr);
-    return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const isEn = this.translationService.currentLanguage === 'en';
+    return date.toLocaleDateString(isEn ? 'en-US' : 'es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 }

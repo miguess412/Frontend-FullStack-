@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, AfterViewInit, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -6,11 +6,14 @@ import { DashboardService, DashboardStats } from '../../services/dashboard';
 import { User } from '../../models/user.model';
 import Chart from 'chart.js/auto';
 import { PdfService } from '../../services/pdf.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { LanguageSelectorComponent } from '../language-selector/language-selector';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe, LanguageSelectorComponent],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
@@ -24,7 +27,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   loading = true;
   error = false;
 
-  // Variables para el gráfico (para que el HTML no se queje)
+  // Control reactivo de dropdowns para evitar fallos de librerías externas
+  mostrarDropdownReportes = false;
+  mostrarDropdownUser = false;
+
+  // Variables para el gráfico
   lineChartLabels: string[] = [];
   lineChartData: any[] = [];
   lineChartOptions: any = { responsive: true, maintainAspectRatio: false };
@@ -44,7 +51,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     private dashboardService: DashboardService,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private pdfService: PdfService
+    private pdfService: PdfService,
+    public translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
@@ -54,9 +62,32 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     });
     this.loadDashboardStats();
     this.loadChartStats();
+
+    // Re-renderizar si cambia el idioma
+    this.translationService.currentLang$.subscribe(() => {
+      this.cdr.detectChanges();
+    });
   }
 
   ngAfterViewInit(): void {}
+
+  toggleDropdownReportes(event: Event): void {
+    event.stopPropagation();
+    this.mostrarDropdownReportes = !this.mostrarDropdownReportes;
+    this.mostrarDropdownUser = false;
+  }
+
+  toggleDropdownUser(event: Event): void {
+    event.stopPropagation();
+    this.mostrarDropdownUser = !this.mostrarDropdownUser;
+    this.mostrarDropdownReportes = false;
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.mostrarDropdownReportes = false;
+    this.mostrarDropdownUser = false;
+  }
 
   loadDashboardStats(): void {
     this.loading = true;
@@ -151,7 +182,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             labels: this.chartData.facturas.labels,
             datasets: [
               {
-                label: 'Pagadas',
+                label: this.translationService.translate('ADMIN_DASHBOARD.PAID', 'Pagadas'),
                 data: this.chartData.facturas.pagadas,
                 borderColor: '#28a745',
                 backgroundColor: 'rgba(40,167,69,0.1)',
@@ -159,7 +190,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
                 fill: true
               },
               {
-                label: 'Pendientes',
+                label: this.translationService.translate('ADMIN_DASHBOARD.PENDING', 'Pendientes'),
                 data: this.chartData.facturas.pendientes,
                 borderColor: '#ffc107',
                 backgroundColor: 'rgba(255,193,7,0.1)',
@@ -208,9 +239,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   formatMoney(value: number | string): string {
     const num = typeof value === 'string' ? parseFloat(value) : value;
-    return new Intl.NumberFormat('es-CO', {
+    const isEn = this.translationService.currentLanguage === 'en';
+    return new Intl.NumberFormat(isEn ? 'en-US' : 'es-CO', {
       style: 'currency',
-      currency: 'COP',
+      currency: isEn ? 'USD' : 'COP',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(num);
@@ -218,7 +250,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   formatDate(dateStr: string): string {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('es-ES');
+    const isEn = this.translationService.currentLanguage === 'en';
+    return date.toLocaleDateString(isEn ? 'en-US' : 'es-ES');
   }
 
   getEstadoClass(estado: string): string {

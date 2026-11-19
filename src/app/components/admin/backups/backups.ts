@@ -3,11 +3,14 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { BackupService, BackupItem } from '../../../services/backup.service';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { LanguageSelectorComponent } from '../../language-selector/language-selector';
+import { TranslationService } from '../../../services/translation.service';
 
 @Component({
   selector: 'app-backups',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe, LanguageSelectorComponent],
   templateUrl: './backups.html',
   styleUrls: ['./backups.css']
 })
@@ -22,11 +25,15 @@ export class BackupsComponent implements OnInit {
     private authService: AuthService,
     private backupService: BackupService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public translationService: TranslationService
   ) {}
 
   ngOnInit(): void {
     this.cargarBackups();
+    this.translationService.currentLang$.subscribe(() => {
+      this.cdr.detectChanges();
+    });
   }
 
   cargarBackups(): void {
@@ -116,7 +123,8 @@ export class BackupsComponent implements OnInit {
   formatDate(dateStr: string | Date): string {
     if (!dateStr) return '-';
     const date = new Date(dateStr);
-    return date.toLocaleString('es-CO', {
+    const isEn = this.translationService.currentLanguage === 'en';
+    return date.toLocaleString(isEn ? 'en-US' : 'es-CO', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',

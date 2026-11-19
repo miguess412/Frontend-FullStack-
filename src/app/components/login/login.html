@@ -1,17 +1,23 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-4">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white text-center">
-                    <h4 class="mb-0">
+        <div class="col-md-5 col-lg-4">
+            <!-- Selector de Idioma Flotante Superior -->
+            <div class="d-flex justify-content-end mb-2">
+                <app-language-selector></app-language-selector>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="mb-0 fw-bold">
                         <i class="bi bi-wifi me-2"></i>
-                        ISP-Manager Admin
+                        {{ 'COMMON.APP_NAME' | translate }}
                     </h4>
+                    <small class="text-white-50">{{ 'LOGIN.SUBTITLE' | translate }}</small>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
                         <div class="mb-3">
-                            <label for="email" class="form-label">Correo Electrónico</label>
+                            <label for="email" class="form-label fw-semibold">{{ 'LOGIN.EMAIL' | translate }}</label>
                             <div class="input-group">
                                 <span class="input-group-text">
                                     <i class="bi bi-envelope"></i>
@@ -25,7 +31,7 @@
                                     required
                                     email
                                     #email="ngModel"
-                                    placeholder="admin@ispmanager.com">
+                                    placeholder="admin@isp.com">
                             </div>
                             <div *ngIf="email.invalid && email.touched" class="text-danger small mt-1">
                                 <i class="bi bi-exclamation-circle"></i>
@@ -34,7 +40,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="password" class="form-label">Contraseña</label>
+                            <label for="password" class="form-label fw-semibold">{{ 'LOGIN.PASSWORD' | translate }}</label>
                             <div class="input-group">
                                 <span class="input-group-text">
                                     <i class="bi bi-lock"></i>
@@ -56,23 +62,23 @@
                             </div>
                         </div>
 
-                        <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+                        <div *ngIf="errorMessage" class="alert alert-danger mt-3 shadow-sm py-2">
                             <i class="bi bi-exclamation-triangle me-2"></i>
                             {{ errorMessage }}
                         </div>
 
                         <button 
                             type="submit" 
-                            class="btn btn-primary w-100 py-2"
+                            class="btn btn-primary w-100 py-2 fw-semibold mt-2 shadow-sm"
                             [disabled]="loginForm.invalid || loading">
                             <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
                             <i *ngIf="!loading" class="bi bi-box-arrow-in-right me-2"></i>
-                            {{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+                            {{ loading ? ('LOGIN.LOGGING_IN' | translate) : ('LOGIN.SIGN_IN' | translate) }}
                         </button>
                     </form>
                 </div>
-                <div class="card-footer text-center text-muted small">
-                    © 2026 ISP-Manager - Panel Administrativo
+                <div class="card-footer text-center text-muted small bg-light py-2">
+                    © 2026 ISP-Manager
                 </div>
             </div>
         </div>

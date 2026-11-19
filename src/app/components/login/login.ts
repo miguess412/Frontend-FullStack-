@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService, LoginRequest } from '../../services/auth.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { LanguageSelectorComponent } from '../language-selector/language-selector';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe, LanguageSelectorComponent],
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
@@ -23,7 +25,7 @@ export class LoginComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
-     private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef
   ) {}
 
   onSubmit(): void {
@@ -59,4 +61,4 @@ export class LoginComponent {
         }
     });
   }
-}   
+}
